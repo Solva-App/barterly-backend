@@ -2,9 +2,11 @@ import { bucket } from "@/config/firebase";
 import { v4 as uuidv4 } from "uuid";
 import logger from "@/utils/logger";
 
+const ROOT_FOLDER = "barterly";
+
 export const uploadToFirebase = async (
   file: Express.Multer.File,
-  folderName: string = "barterly"
+  subFolder?: string
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     if (!file) {
@@ -12,7 +14,9 @@ export const uploadToFirebase = async (
     }
 
     const fileExtension = file.originalname.split(".").pop();
-    const fileName = `${folderName}/${uuidv4()}.${fileExtension}`;
+    const cleanSubFolder = subFolder?.replace(/^\/+|\/+$/g, "");
+    const folderPath = cleanSubFolder ? `${ROOT_FOLDER}/${cleanSubFolder}` : ROOT_FOLDER;
+    const fileName = `${folderPath}/${uuidv4()}.${fileExtension}`;
     const fileUpload = bucket.file(fileName);
 
     const stream = fileUpload.createWriteStream({
@@ -29,7 +33,6 @@ export const uploadToFirebase = async (
 
     stream.on("finish", async () => {
       try {
-        // Make the file publicly accessible
         await fileUpload.makePublic();
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`;
         resolve(publicUrl);

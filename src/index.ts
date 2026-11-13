@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use(cookieParser());
 
-app.get("/api/health", (req: Request, res: Response) => {
+app.get("/api/v1/health", (req: Request, res: Response) => {
   res.status(200).json({ status: "success", message: "API is running smoothly" });
 });
 
